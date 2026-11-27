@@ -1,5 +1,7 @@
 package ma.enset.nn.core;
 
+import ma.enset.nn.aspect.Secured;
+import ma.enset.nn.aspect.SecurityContext;
 import ma.enset.nn.config.NetworkConfig;
 import ma.enset.nn.observer.NetworkEvent;
 import ma.enset.nn.observer.NetworkObserver;
@@ -69,15 +71,18 @@ public class NeuralNetwork implements NetworkSubject {
         return Collections.unmodifiableList(copy);
     }
 
+    @Secured(SecurityContext.DATA_SCIENTIST_ROLE)
     public double[] predict(double[] input) {
         Objects.requireNonNull(input, "input");
         return state.predict(this, input);
     }
 
+    @Secured(SecurityContext.DATA_SCIENTIST_ROLE)
     public void train() {
         state.train(this);
     }
 
+    @Secured(SecurityContext.DATA_SCIENTIST_ROLE)
     public void fit() {
         state.fit(this);
     }
@@ -176,3 +181,4 @@ public class NeuralNetwork implements NetworkSubject {
         return Collections.unmodifiableList(lossHistory);
     }
 }
+

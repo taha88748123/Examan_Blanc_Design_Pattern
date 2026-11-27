@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Rapport — Examen Blanc Design Pattern</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    color: #1e293b;
+    font-size: 9.8pt;
+    line-height: 1.44;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section {
+    page-break-before: always;
+    background: #ffffff;
+  }
+  .section:first-of-type { page-break-before: avoid; }
+  h2 { page-break-after: avoid; }
+  h3, h4 { page-break-after: avoid; }
+  .figure, .code, .card, .stats, .note, tr { page-break-inside: avoid; }
+
+  .cover {
+    background: linear-gradient(140deg, #071a30 0%, #0b2a4a 45%, #0d3a66 100%);
+    color: #e2e8f0;
+    padding: 20mm 18mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover::before, .cover::after { content: none !important; }
+  .cover .univ { font-size: 10.5pt; line-height: 1.65; color: #cbd5e1; }
+  .cover .univ strong { color: #ffffff; font-size: 12pt; letter-spacing: .3px; }
+  .cover .fil {
+    margin-top: 7mm; display: inline-block; padding: 2mm 5mm;
+    border: 1px solid rgba(148, 197, 255, .45); border-radius: 999px;
+    color: #93c5fd; font-size: 9.5pt; letter-spacing: 1.6px; text-transform: uppercase;
+  }
+  .cover-main { margin-top: 10mm; }
+  .cover .kicker { color: #38bdf8; font-size: 11pt; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6mm; }
+  .cover h1 { color: #ffffff; font-size: 33pt; line-height: 1.18; margin: 0 0 7mm; letter-spacing: -.6px; }
+  .cover h1 span { color: #93c5fd; font-size: 19pt; font-weight: 500; display: block; margin-top: 5mm; letter-spacing: -.2px; }
+  .cover .lead { color: #cbd5e1; font-size: 12pt; max-width: 150mm; margin: 0; }
+  .cover-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; margin-top: 14mm; }
+  .cover-meta div { border-left: 3px solid #2563eb; padding-left: 4mm; }
+  .cover-meta span { display: block; color: #7dd3fc; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 1mm; }
+  .cover-meta strong { color: #f1f5f9; font-size: 10.5pt; font-weight: 600; line-height: 1.35; display: block; }
+  .cover-footer { color: #94a3b8; font-size: 8.5pt; border-top: 1px solid rgba(148, 163, 184, .35); padding-top: 4mm; }
+
+  h2 {
+    color: #111827; font-size: 16.5pt; margin: 0 0 3mm; letter-spacing: -.3px;
+    padding-bottom: 2mm; border-bottom: 1.5px solid #374151;
+  }
+  h3 { color: #111827; font-size: 11.6pt; margin: 3.2mm 0 1.4mm; }
+  h4 { color: #1f2937; font-size: 10.4pt; margin: 2.6mm 0 1mm; }
+  p { margin: 0 0 2.2mm; text-align: justify; }
+  ul, ol { margin: 0 0 2.2mm; padding-left: 4.6mm; }
+  li { margin-bottom: .8mm; }
+  .muted { color: #64748b; }
+  .small { font-size: 9pt; }
+  .accent { color: #1f3a5f; font-weight: 600; }
+
+  .toc { margin: 1.5mm 0 5mm; }
+  .toc a { color: #0f172a; text-decoration: none; }
+  .toc ol { counter-reset: toc; list-style: none; padding: 0; margin: 0; }
+  .toc li {
+    counter-increment: toc; display: flex; align-items: baseline; gap: 3mm;
+    padding: 1.15mm 0; border-bottom: 1px dashed #e2e8f0; font-size: 9.8pt;
+  }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero); color: #6b7280; font-weight: 700; font-size: 9pt; min-width: 7mm;
+  }
+
+  .card {
+    border: 1px solid #dbe4ee; border-radius: 3mm; padding: 2.8mm 4mm; margin-bottom: 2.4mm;
+    background: #f8fafc;
+  }
+  .card.pattern, .card.improve, .card.security { border-left: 1px solid #d1d5db; background: #fafafa; }
+  .card h4 { margin-top: 0; }
+  .card p { text-align: left; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.8mm 0 2.8mm; font-size: 8.5pt; }
+  th { background: #f3f4f6; color: #111827; text-align: left; padding: 1.6mm 2.2mm; font-weight: 600; border-bottom: 1px solid #6b7280; }
+  td { padding: 1.4mm 2.2mm; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }\n  .compact-table { font-size: 7.7pt; }\n  .compact-table th, .compact-table td { padding: .9mm 2mm; }
+  .ok { color: #15803d; font-weight: 700; }
+
+  .stats { display: flex; gap: 2.5mm; margin: 2mm 0 3mm; }
+  .stat { flex: 1; border: 1px solid #dbe4ee; border-radius: 3mm; padding: 2.4mm 3.4mm; background: #f8fafc; }
+  .stat .label { font-size: 7.6pt; color: #64748b; text-transform: uppercase; letter-spacing: .8px; }
+  .stat .value { font-size: 16pt; font-weight: 700; color: #111827; line-height: 1.1; margin-top: .6mm; }
+
+  .code {
+    background: #f7f7f8; color: #111827; border: 1px solid #d1d5db; border-radius: 2.5mm; padding: 2.5mm 3.4mm;
+    font-family: 'Cascadia Mono', 'Consolas', monospace; font-size: 7.35pt; line-height: 1.4;
+    white-space: pre; overflow: hidden; margin: 1.4mm 0 2.4mm;
+  }
+  .code .comment { color: #7dd3fc; }
+  .caption { font-size: 8pt; color: #64748b; text-align: center; margin: 1mm 0 0; }
+  .figure { margin: 1.5mm 0 2.2mm; }
+  .figure img { display: block; width: 100%; max-height: 150mm; object-fit: contain; border: 1px solid #d1d5db; border-radius: 2.5mm; }
+  .figure img.short { max-height: 96mm; }\n  .figure img.medium { max-height: 100mm; }
+  .figure img.wide { max-height: 186mm; }
+
+  .kv { display: grid; grid-template-columns: 32mm 1fr; gap: 1.4mm 4mm; font-size: 9pt; }
+  .kv dt { color: #64748b; }
+  .kv dd { margin: 0; color: #0f172a; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .note {
+    border-left: 2px solid #6b7280; background: #f7f7f7; padding: 2.4mm 3.4mm;
+    border-radius: 0 2.5mm 2.5mm 0; font-size: 8.9pt; margin: 2mm 0;
+  }
+  .tag { display: inline-block; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 2mm;
+         padding: .6mm 2.4mm; font-size: 8pt; font-weight: 600; margin-right: 1.5mm; }
+
+  .tree {
+    font-family: 'Cascadia Mono', 'Consolas', monospace; font-size: 7.5pt; line-height: 1.42;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 2.5mm; padding: 2.8mm 4mm;
+    white-space: pre; margin: 1.5mm 0 2.6mm;
+  }
+  a { color: #1f3a5f; }
+</style>
+</head>
+<body>
+
+<!-- ============================= SOMMAIRE + CONTEXTE ============================= -->
+<section class="section">
+  <h2>Sommaire</h2>
+  <nav class="toc">
+    <ol>
+      <li>Contexte, objectifs et livrables</li>
+      <li>Analyse des exigences et choix des design patterns</li>
+      <li>Conception — modèle du réseau (domaine, State, Observer)</li>
+      <li>Conception — Strategy et Adapter</li>
+      <li>Conception — Decorator, Factory, Builder et Singleton</li>
+      <li>Conception — programmation orientée aspect (AOP)</li>
+      <li>Implémentation — extraits de code significatifs</li>
+      <li>Tests unitaires — stratégie et résultats</li>
+      <li>Démonstration — exécution du réseau</li>
+      <li>Journalisation et sécurisation AOP</li>
+      <li>Améliorations et conclusion</li>
+      
+    </ol>
+  </nav>
+
+  <h2 style="margin-top:8mm;">1. Contexte et objectifs</h2>
+  <p>
+    L'énoncé demande la modélisation et l'implémentation orientée objet, en Java, d'un réseau de
+    neurones artificiels entièrement connecté. Un réseau est composé de couches
+    (<em>Input</em>, <em>Hidden</em>, <em>Output</em>), chaque couche contient des neurones et chaque
+    neurone reçoit des connexions pondérées par un poids <strong>W ∈ [0, 1]</strong>, additionne le
+    biais <strong>b</strong>, puis applique une fonction d'activation avant de transmettre sa sortie
+    à la couche suivante. La méthode <span class="accent">predict(double[] input)</span> retourne le
+    vecteur de sortie du réseau.
+  </p>
+  <p>
+    Au-delà du calcul, la difficulté porte sur la <strong>qualité de conception</strong> : fonctions
+    d'activation interchangeables, adaptation d'une ancienne bibliothèque, états du réseau,
+    notification d'un tableau de bord, enrichissement dynamique des couches, journalisation et
+    sécurisation transverses. Chaque exigence est traitée par un pattern dédié, puis des
+    améliorations (Factory, Builder, Singleton) viennent compléter l'architecture.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Design patterns</div><div class="value">9</div></div>
+    <div class="stat"><div class="label">Classes de tests</div><div class="value">10</div></div>
+    <div class="stat"><div class="label">Tests unitaires</div><div class="value">43</div></div>
+    <div class="stat"><div class="label">Échecs</div><div class="value">0</div></div>
+  </div>
+
+  <div class="card">
+    <h4>Livrables</h4>
+    <dl class="kv">
+      <dt>Dépôt GitHub</dt><dd>github.com/taha88748123/Examan_Blanc_Design_Pattern</dd>
+      <dt>Implémentation</dt><dd>Projet Maven Java 17, code source complet et documenté</dd>
+      <dt>Tests</dt><dd>43 tests JUnit 5 — 10 classes, exécutés par Maven Surefire</dd>
+      <dt>Rapport</dt><dd>Le présent document PDF : conception, code, tests et captures d'écran</dd>
+    </dl>
+  </div>
+
+  <div class="note">
+    <strong>Vérification.</strong> Les tests présentés sont ceux exécutés par Maven Surefire sur la
+    version finale du code ; les captures correspondent à l'exécution effective de la démonstration.
+  </div>
+</section>
+
+<!-- ============================= ANALYSE ============================= -->
+<section class="section">
+  <h2>2. Analyse des exigences et choix des design patterns</h2>
+  <p>
+    Le tableau ci-dessous met en regard chaque contrainte de l'énoncé et le pattern retenu.
+    Les choix privilégient le faible couplage, l'ouverture à l'extension et le respect du
+    principe de responsabilité unique.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th style="width:6mm;">#</th><th style="width:44mm;">Exigence</th><th style="width:26mm;">Pattern</th><th>Implémentation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>a</td>
+        <td>Famille de fonctions d'activation encapsulées et interchangeables</td>
+        <td><strong>Strategy</strong></td>
+        <td><code>ActivationFunction</code> + <code>Sigmoid</code>, <code>Identity</code>, <code>ReLU</code>, <code>Tanh</code>, <code>Softmax</code>. Le neurone détient une stratégie et peut la remplacer.</td>
+      </tr>
+      <tr>
+        <td>b</td>
+        <td>Adapter une ancienne fonction d'activation à interface différente</td>
+        <td><strong>Adapter</strong></td>
+        <td><code>LegacyActivationAdapter</code> adapte <code>LegacySquashingFunction</code> (méthode <code>squash()</code>) à <code>ActivationFunction</code> (<code>apply()</code>) sans modifier l'ancien code.</td>
+      </tr>
+      <tr>
+        <td>c</td>
+        <td>États Construction, Training, Trained ; <code>predict</code> réservé à l'état entraîné</td>
+        <td><strong>State</strong></td>
+        <td><code>NeuralNetworkState</code> + <code>ConstructionState</code>, <code>TrainingState</code>, <code>TrainedState</code>. Le contexte délègue <code>train()</code>, <code>fit()</code> et <code>predict()</code> à l'état courant.</td>
+      </tr>
+      <tr>
+        <td>d</td>
+        <td>Notifier les composants dépendants lors d'un changement d'état</td>
+        <td><strong>Observer</strong></td>
+        <td><code>NetworkSubject</code> / <code>NetworkObserver</code> ; <code>Dashboard</code> agrège et affiche les statistiques à chaque transition.</td>
+      </tr>
+      <tr>
+        <td>e</td>
+        <td>Faire évoluer dynamiquement le comportement des couches</td>
+        <td><strong>Decorator</strong></td>
+        <td><code>LayerDecorator</code> + <code>DropoutDecorator</code> et <code>BatchNormalizationDecorator</code>, composables et utilisables dans le réseau.</td>
+      </tr>
+      <tr>
+        <td>f</td>
+        <td>Journaliser toutes les méthodes</td>
+        <td><strong>Aspect AOP</strong></td>
+        <td><code>LoggingAspect</code> (AspectJ, tissage à la compilation) trace méthode, arguments, résultat et durée dans <code>logs/neural-network.log</code>.</td>
+      </tr>
+      <tr>
+        <td>g</td>
+        <td>Sécuriser l'application</td>
+        <td><strong>Aspect AOP</strong></td>
+        <td><code>SecurityAspect</code> intercepte les méthodes annotées <code>@Secured</code> et vérifie le rôle via <code>SecurityContext</code>.</td>
+      </tr>
+      <tr>
+        <td>+</td>
+        <td>Améliorations libres</td>
+        <td><strong>Factory, Builder, Singleton</strong></td>
+        <td>Création centralisée des couches et fonctions (<code>LayerFactory</code>, <code>ActivationFactory</code>), construction fluide (<code>NeuralNetworkBuilder</code>), configuration unique (<code>NetworkConfig</code>).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card pattern">
+    <h4>Interprétation de la machine à états</h4>
+    <p style="margin:0;">
+      Le réseau démarre en <strong>Construction</strong>. <code>train()</code> le fait passer en
+      <strong>Training</strong>, exécute les epochs puis le fait passer en <strong>Trained</strong>.
+      <code>fit()</code> depuis Construction déclenche le même pipeline d'entraînement et place le
+      réseau en état d'exécution (Trained), conformément à l'énoncé. <code>predict()</code> est refusé
+      (exception explicite) en Construction et en Training ; un ré-entraînement reste possible depuis
+      Trained. Chaque transition notifie les observateurs.
+    </p>
+  </div>
+
+  <p class="small muted">
+    Validation : les poids de connexion sont contrôlés dans <code>Connection</code> (0 ≤ W ≤ 1) ; les
+    tailles de vecteurs et l'architecture (première couche Input, dernière Output, couches
+    intermédiaires Hidden) sont validées à la construction du réseau.
+  </p>
+</section>
+
+<!-- ============================= CONCEPTION CORE ============================= -->
+<section class="section">
+  <h2>3. Conception — modèle du réseau, State et Observer</h2>
+  <p>
+    Le cœur du modèle combine trois responsabilités : la <strong>structure</strong> (réseau, couches,
+    neurones, connexions), le <strong>comportement état-dépendant</strong> (State) et la
+    <strong>diffusion d'événements</strong> (Observer). <code>NeuralNetwork</code> joue le rôle de
+    contexte : il possède ses couches, délègue son comportement à un état et notifie ses observateurs.
+  </p>
+
+  <div class="figure">
+    <img src="screenshots/diagram-core.png" alt="Diagramme de classes — domaine, State et Observer">
+    <div class="caption">Diagramme de classes — domaine, State et Observer (diagramme UML du modèle).</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3>Structure du réseau</h3>
+      <ul>
+        <li><code>NeuralNetwork</code> compose une liste ordonnée de <code>Layer</code>.</li>
+        <li><code>SimpleLayer</code> est une couche concrète typée (Input / Hidden / Output).</li>
+        <li><code>Neuron</code> calcule la somme pondérée + biais, puis applique sa fonction d'activation.</li>
+        <li><code>Connection</code> relie un neurone source à un neurone destination et garantit W ∈ [0, 1].</li>
+      </ul>
+    </div>
+    <div>
+      <h3>State &amp; Observer</h3>
+      <ul>
+        <li>Chaque état encapsule les opérations autorisées : <code>predict()</code> lève une exception hors état Trained.</li>
+        <li><code>transitionTo()</code> met à jour l'état et publie un <code>NetworkEvent</code>.</li>
+        <li><code>Dashboard</code> implémente <code>NetworkObserver</code> : comptage par état, historique, résumé.</li>
+        <li>Le couplage reste faible : le réseau ne connaît que les interfaces.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Entièrement connecté.</strong> Lors de la construction, chaque couche est connectée à la
+    suivante : chaque neurone cible reçoit une connexion depuis tous les neurones de la couche
+    précédente, avec un poids aléatoire dans [0, 1]. Le réseau 3-5-2 de l'énoncé est ainsi reproduit
+    fidèlement (3 entrées, 5 neurones cachés, 2 sorties).
+  </div>
+</section>
+
+<!-- ============================= STRATEGY ADAPTER ============================= -->
+<section class="section">
+  <h2>4. Conception — Strategy et Adapter</h2>
+  <p>
+    L'exigence (a) impose une famille de fonctions d'activation encapsulées et interchangeables :
+    c'est le pattern <strong>Strategy</strong>. L'interface <code>ActivationFunction</code> isole
+    l'algorithme du neurone qui l'utilise ; ajouter une fonction (par exemple ReLU) ne modifie ni le
+    neurone ni le réseau. Softmax est un cas particulier : l'interface expose aussi une application
+    vectorielle (<code>apply(double[])</code>) car la normalisation concerne toute la couche.
+  </p>
+
+  <div class="figure">
+    <img src="screenshots/diagram-activation.png" alt="Diagramme de classes — Strategy et Adapter" class="medium">
+    <div class="caption">Diagramme de classes — Strategy (fonctions d'activation) et Adapter (bibliothèque legacy).</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card pattern">
+      <h4>Strategy — exigence (a)</h4>
+      <p style="margin:0;">
+        Les stratégies concrètes (<code>Sigmoid</code>, <code>Identity</code>, <code>ReLU</code>,
+        <code>Tanh</code>, <code>Softmax</code>) partagent le contrat <code>apply</code> /
+        <code>name</code>. Le neurone reçoit sa stratégie par constructeur et peut la remplacer :
+        le comportement est interchangeable sans héritage rigide.
+      </p>
+    </div>
+    <div class="card pattern">
+      <h4>Adapter — exigence (b)</h4>
+      <p style="margin:0;">
+        L'ancienne bibliothèque expose <code>LegacySquashingFunction.squash()</code>.
+        <code>LegacyActivationAdapter</code> implémente <code>ActivationFunction</code> et délègue à
+        cette ancienne interface. Aucune modification de la bibliothèque legacy n'est nécessaire et
+        l'adaptateur est utilisable partout où une stratégie est attendue.
+      </p>
+    </div>
+  </div>
+
+  <table class="compact-table"><thead><tr><th>Fonction</th><th>Formule</th><th>Usage typique</th></tr></thead>
+    <tbody>
+      <tr><td>Sigmoid</td><td>1 / (1 + e<sup>-x</sup>)</td><td>Couches cachées, sortie binaire</td></tr>
+      <tr><td>Identity</td><td>f(x) = x</td><td>Couche d'entrée, régression</td></tr>
+      <tr><td>ReLU</td><td>max(0, x)</td><td>Couches cachées profondes</td></tr>
+      <tr><td>Tanh</td><td>tanh(x)</td><td>Sorties centrées en [-1, 1]</td></tr>
+      <tr><td>Softmax</td><td>e<sup>x<sub>i</sub></sup> / Σ e<sup>x<sub>j</sub></sup></td><td>Distribution de probabilités en sortie</td></tr>
+      <tr><td>LegacyArcTan (adaptée)</td><td>atan(x) · 2/π</td><td>Réutilisation d'une ancienne bibliothèque</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================= DECORATOR FACTORY BUILDER ============================= -->
+<section class="section">
+  <h2>5. Conception — Decorator, Factory, Builder et Singleton</h2>
+  <p>
+    L'exigence (e) demande de faire évoluer dynamiquement le comportement d'une couche.
+    Le pattern <strong>Decorator</strong> permet d'envelopper une couche sans modifier son code :
+    <code>DropoutDecorator</code> désactive aléatoirement une proportion de sorties et
+    <code>BatchNormalizationDecorator</code> centre et réduit les sorties. Les décorateurs sont
+    composables (BatchNorm + Dropout) et restent des <code>Layer</code> : le réseau les accepte
+    comme n'importe quelle couche.
+  </p>
+
+  <div class="figure">
+    <img src="screenshots/diagram-structure.png" alt="Diagramme de classes — Decorator, Factory, Builder, Singleton">
+    <div class="caption">Diagramme de classes — Decorator, Factory, Builder et Singleton.</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card improve">
+      <h4>Factory — amélioration</h4>
+      <p style="margin:0;">
+        <code>ActivationFactory.create("relu")</code> et <code>LayerFactory</code> centralisent la
+        création et évitent la duplication des <code>new</code>. L'ajout d'une fonction se fait à un
+        seul endroit (fabrique), pas chez tous les clients.
+      </p>
+    </div>
+    <div class="card improve">
+      <h4>Builder + Singleton — améliorations</h4>
+      <p style="margin:0;">
+        <code>NeuralNetworkBuilder</code> offre une construction fluide et lisible
+        (couches, seed, observateurs). <code>NetworkConfig</code> est un singleton thread-safe par
+        initialisation statique : une configuration unique pour epochs et learning rate.
+      </p>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Découplage.</strong> Le Builder s'appuie sur l'interface <code>Layer</code> : il accepte
+    aussi bien une couche simple qu'une chaîne de décorateurs. C'est un point de composition
+    puissant, illustré par la démo : <code>Dropout(BatchNorm(SimpleLayer))</code>.
+  </div>
+</section>
+
+<!-- ============================= AOP ============================= -->
+<section class="section">
+  <h2>6. Conception — programmation orientée aspect</h2>
+  <p>
+    Les exigences (f) et (g) sont transverses : journaliser toutes les méthodes et sécuriser
+    l'application. Les implémenter dans chaque classe polluerait le domaine. Deux aspects AspectJ
+    tissés à la compilation s'en chargent : <code>LoggingAspect</code> et <code>SecurityAspect</code>.
+  </p>
+
+  <div class="figure">
+    <img src="screenshots/diagram-aop.png" alt="Diagramme de classes — aspects AOP" class="short">
+    <div class="caption">Diagramme de classes — aspects de journalisation et de sécurité.</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card pattern">
+      <h4>LoggingAspect — exigence (f)</h4>
+      <p>
+        Pointcut :
+      </p>
+      <div class="code" style="font-size:7.2pt;">execution(* ma.enset.nn..*.*(..))
+&amp;&amp; !within(ma.enset.nn.aspect..*)</div>
+      <p style="margin:0;">
+        Autour de chaque méthode : nom qualifié, arguments (tableaux inclus), résultat, durée en
+        millisecondes. Les traces sont écrites dans <code>logs/neural-network.log</code> via
+        <code>java.util.logging</code>, sans modifier le code métier.
+      </p>
+    </div>
+    <div class="card security">
+      <h4>SecurityAspect — exigence (g)</h4>
+      <p>
+        Pointcut :
+      </p>
+      <div class="code" style="font-size:7.2pt;">execution(@Secured * ma.enset.nn..*(..))
+&amp;&amp; @annotation(secured)</div>
+      <p style="margin:0;">
+        <code>train()</code>, <code>fit()</code> et <code>predict()</code> sont annotés
+        <code>@Secured("DATA_SCIENTIST")</code>. Le rôle courant est porté par un
+        <code>ThreadLocal</code> (<code>SecurityContext</code>) ; un invité est refusé avec une
+        <code>SecurityException</code>, un administrateur est autorisé.
+      </p>
+    </div>
+  </div>
+
+  <p>
+    Le tissage est réalisé par <span class="tag">aspectj-maven-plugin 1.15.0</span> avec AspectJ
+    1.9.27 (compile-time weaving). Les tests unitaires s'exécutent donc avec les aspects réellement
+    appliqués, ce qui valide le tissage et pas seulement le code des aspects.
+  </p>
+
+  <h3 style="margin-top:3mm;">Règles d'accès appliquées par l'aspect</h3>
+  <table class="compact-table">
+    <thead><tr><th>Rôle courant</th><th>train() / fit()</th><th>predict()</th><th>Constat</th></tr></thead>
+    <tbody>
+      <tr><td>GUEST</td><td>refusé</td><td>refusé</td><td><code>SecurityException</code> levée avant le corps de la méthode</td></tr>
+      <tr><td>DATA_SCIENTIST</td><td>autorisé</td><td>autorisé si état Trained</td><td>Cas nominal de la démonstration</td></tr>
+      <tr><td>ADMIN</td><td>autorisé</td><td>autorisé si état Trained</td><td>Super-utilisateur (bypass explicite)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Traçabilité.</strong> Le journal produit par la démo est capturé en section 10 : on y voit
+    les appels <code>NeuralNetwork.train</code>, <code>ConstructionState.train</code>,
+    <code>TrainingState.train</code> et les transitions, ainsi que le refus d'accès <code>GUEST</code>.
+  </div>
+</section>
+
+<!-- ============================= CODE 1 ============================= -->
+<section class="section">
+  <h2>7. Implémentation — extraits significatifs (1/2)</h2>
+
+  <h3>7.1 Strategy — contrat et fonction Sigmoïde</h3>
+  <div class="code">public interface ActivationFunction {
+    double apply(double input);
+    String name();
+
+    default boolean isVectorBased() { return false; }
+
+    default double[] apply(double[] inputs) {
+        double[] result = new double[inputs.length];
+        for (int i = 0; i &lt; inputs.length; i++) {
+            result[i] = apply(inputs[i]);
+        }
+        return result;
+    }
+}
+
+public class SigmoidActivation implements ActivationFunction {
+    @Override
+    public double apply(double input) {
+        return 1.0 / (1.0 + Math.exp(-input));
+    }
+
+    @Override
+    public String name() { return "Sigmoid"; }
+}</div>
+
+  <h3>7.2 State — contrat et état Construction</h3>
+  <div class="code">public interface NeuralNetworkState {
+    NetworkStateType type();
+    double[] predict(NeuralNetwork network, double[] input);
+    void train(NeuralNetwork network);
+    void fit(NeuralNetwork network);
+}
+
+public class ConstructionState implements NeuralNetworkState {
+    @Override
+    public double[] predict(NeuralNetwork network, double[] input) {
+        throw new IllegalStateException(
+            "Le reseau est en construction : appelez train() ou fit() avant de predire");
+    }
+
+    @Override
+    public void train(NeuralNetwork network) {
+        network.transitionTo(new TrainingState(), "Debut de l'entrainement");
+        network.runTraining();
+        network.transitionTo(new TrainedState(), "Entrainement termine");
+    }
+
+    @Override
+    public void fit(NeuralNetwork network) {
+        network.transitionTo(new TrainingState(), "fit() : passage en execution");
+        network.runTraining();
+        network.transitionTo(new TrainedState(), "fit() : le reseau est pret");
+    }
+}</div>
+
+  <p class="small muted">
+    Le contexte <code>NeuralNetwork</code> expose <code>train()</code>, <code>fit()</code> et
+    <code>predict()</code> en déléguant systématiquement à l'état courant. La méthode
+    <code>transitionTo()</code> publie un événement aux observateurs.
+  </p>
+</section>
+
+<!-- ============================= CODE 2 ============================= -->
+<section class="section">
+  <h2>8. Implémentation — extraits significatifs (2/2)</h2>
+
+  <h3>8.1 Observer — tableau de bord</h3>
+  <div class="code">public interface NetworkObserver {
+    void onNetworkEvent(NetworkEvent event);
+}
+
+public class Dashboard implements NetworkObserver {
+    private final Map&lt;NetworkStateType, Integer&gt; transitionCounts
+            = new EnumMap&lt;&gt;(NetworkStateType.class);
+
+    @Override
+    public void onNetworkEvent(NetworkEvent event) {
+        history.add(event);
+        transitionCounts.merge(event.state(), 1, Integer::sum);
+        System.out.printf("[Dashboard] %s | etat=%-12s | %s%n",
+                event.networkName(), event.state(), event.message());
+    }
+}</div>
+
+  <h3>8.2 Decorator — couche décorée et dropout</h3>
+  <div class="code">public abstract class LayerDecorator implements Layer {
+    protected final Layer delegate;
+
+    @Override
+    public double[] forward(double[] inputs) {
+        return delegate.forward(inputs);
+    }
+    // connectTo, neuronCount, type, description, getNeurons délèguent aussi
+}
+
+public class DropoutDecorator extends LayerDecorator {
+    private final double rate;
+    private final Random random;
+
+    @Override
+    public double[] forward(double[] inputs) {
+        double[] outputs = super.forward(inputs);
+        for (int i = 0; i &lt; outputs.length; i++) {
+            if (random.nextDouble() &lt; rate) outputs[i] = 0.0;
+            else outputs[i] *= 1.0 / (1.0 - rate);
+        }
+        propagateToNeurons(outputs);
+        return outputs;
+    }
+}</div>
+
+  <h3>8.3 Adapter — adaptation legacy</h3>
+  <div class="code">public class LegacyActivationAdapter implements ActivationFunction {
+    private final LegacySquashingFunction legacyFunction;
+
+    @Override
+    public double apply(double input) {
+        return legacyFunction.squash(input);
+    }
+
+    @Override
+    public String name() {
+        return "Adapter[" + legacyFunction.getLabel() + "]";
+    }
+}</div>
+
+  <h3>8.4 Aspects AOP — tissage à la compilation</h3>
+  <p>
+    Les deux aspects sont tissés par <span class="tag">aspectj-maven-plugin</span> au moment de la
+    compilation : aucun proxy dynamique, aucune dépendance Spring, aucun changement dans le code
+    métier. Les tests JUnit s'exécutent donc avec le tissage réellement appliqué.
+  </p>
+  <div class="code">@Aspect
+public class LoggingAspect {
+    @Around("execution(* ma.enset.nn..*.*(..)) &amp;&amp; !within(ma.enset.nn.aspect..*) "
+            + "&amp;&amp; !within(ma.enset.nn..*Test*)")
+    public Object logMethodCall(ProceedingJoinPoint joinPoint) throws Throwable {
+        long start = System.nanoTime();
+        Object result = joinPoint.proceed();
+        long durationMs = (System.nanoTime() - start) / 1_000_000;
+        LOGGER.info(String.format("%s | args=%s | result=%s | %d ms",
+                joinPoint.getSignature().toShortString(), format(joinPoint.getArgs()),
+                format(new Object[]{result}), durationMs));
+        return result;
+    }
+}
+
+@Aspect
+public class SecurityAspect {
+    @Around("execution(@ma.enset.nn.aspect.Secured * ma.enset.nn..*(..)) "
+            + "&amp;&amp; @annotation(secured)")
+    public Object checkAccess(ProceedingJoinPoint joinPoint, Secured secured) throws Throwable {
+        if (!SecurityContext.hasRole(secured.value())) {
+            throw new SecurityException("Acces refuse : role requis " + secured.value());
+        }
+        return joinPoint.proceed();
+    }
+}</div>
+
+  <p class="small muted">Déclaration de l'annotation et utilisation sur l'API du réseau :</p>
+  <div class="code">@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+public @interface Secured {
+    String value() default "DATA_SCIENTIST";
+}
+
+public class NeuralNetwork {
+    @Secured(SecurityContext.DATA_SCIENTIST_ROLE)
+    public void train() { state.train(this); }
+
+    @Secured(SecurityContext.DATA_SCIENTIST_ROLE)
+    public double[] predict(double[] input) {
+        return state.predict(this, input);
+    }
+}</div>
+</section>
+
+<!-- ============================= TESTS TABLE ============================= -->
+<section class="section">
+  <h2>9. Tests unitaires — stratégie et résultats</h2>
+  <p>
+    La stratégie de test suit les exigences : chaque pattern possède ses tests dédiés, complétés par
+    des tests du modèle (validation des poids, architecture, connexions) et des tests AOP (tissage,
+    refus d'accès, journalisation). Les tests sont exécutés par Maven Surefire avec les aspects
+    tissés à la compilation.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Tests</div><div class="value">43</div></div>
+    <div class="stat"><div class="label">Classes</div><div class="value">10</div></div>
+    <div class="stat"><div class="label">Échecs / erreurs</div><div class="value">0</div></div>
+    <div class="stat"><div class="label">Durée</div><div class="value">1.12s</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Classe de test</th><th>Tests</th><th>Échecs</th><th>Erreurs</th><th>Durée</th><th>Statut</th></tr></thead>
+    <tbody>
+      <tr><td>ActivationFunctionTest</td><td class='num'>5</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.095 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>AdapterTest</td><td class='num'>3</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.140 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>AopTest</td><td class='num'>4</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.142 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>BuilderTest</td><td class='num'>5</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.117 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>CoreModelTest</td><td class='num'>5</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.035 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>DecoratorTest</td><td class='num'>5</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.109 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>FactoryTest</td><td class='num'>4</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.022 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>NetworkConfigTest</td><td class='num'>3</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.006 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>NeuralNetworkStateTest</td><td class='num'>6</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.415 s</td><td><span class='ok'>OK</span></td></tr>
+      <tr><td>ObserverTest</td><td class='num'>3</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0.042 s</td><td><span class='ok'>OK</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>Ce qui est vérifié</h4>
+      <ul style="margin-bottom:0;">
+        <li>Strategy : bornes et symétrie de Sigmoid, ReLU, Tanh, distribution Softmax.</li>
+        <li>Adapter : formule legacy, nom d'adaptateur, usage dans un réseau.</li>
+        <li>State : état initial, refus de predict, transitions, ré-entraînement.</li>
+        <li>Observer : notifications, comptage, retrait d'un observateur.</li>
+        <li>Decorator : taux invalides, dropout total, moyenne/variance BatchNorm, composition.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Et aussi</h4>
+      <ul style="margin-bottom:0;">
+        <li>Factory : création des fonctions et des couches, cas inconnus.</li>
+        <li>Builder : architecture, observateurs, epochs, déterminisme de la graine.</li>
+        <li>Singleton : instance unique, validation, réinitialisation.</li>
+        <li>AOP : journalisation des appels, refus GUEST, autorisation ADMIN.</li>
+        <li>Domaine : poids W ∈ [0,1], tailles d'entrée, connexion complète.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="small muted">
+    Commande : <span class="accent">mvn clean test</span> — rapport détaillé dans
+    <code>target/surefire-reports</code>.
+  </p>
+</section>
+
+<!-- ============================= TESTS SCREENSHOT ============================= -->
+<section class="section">
+  <h2>9 bis. Tests unitaires — capture d'exécution</h2>
+  <p>
+    La capture ci-dessous présente la synthèse des rapports Surefire de la dernière exécution :
+    tableau par classe de test et détail des 43 tests.
+  </p>
+  <div class="figure">
+    <img src="screenshots/tests.png" alt="Capture des résultats des tests" class="wide">
+    <div class="caption">Résultats JUnit 5 — 43 tests, 0 échec.</div>
+  </div>
+</section>
+
+<!-- ============================= DEMO ============================= -->
+<section class="section">
+  <h2>10. Démonstration — exécution du réseau</h2>
+  <p>
+    La démonstration construit un réseau 3-5-2 via le Builder, avec une couche cachée décorée
+    (BatchNorm + Dropout) et un tableau de bord observateur. Elle illustre successivement :
+    l'architecture, le refus de <code>predict()</code> en Construction, le refus d'accès pour le rôle
+    GUEST, l'entraînement via <code>fit()</code>, puis une prédiction Softmax valide.
+  </p>
+  <div class="figure">
+    <img src="screenshots/demo.png" alt="Capture de l'exécution de la démonstration">
+    <div class="caption">Exécution réelle : <span class="accent">mvn exec:java</span> .</div>
+  </div>
+  <div class="note" style="margin-bottom:0;">
+    <strong>Lecture des résultats.</strong> Le tableau de bord reçoit deux notifications
+    (TRAINING puis TRAINED). La prédiction retourne deux probabilités dont la somme vaut 1
+    (Softmax). L'accès GUEST est bloqué avant toute modification de l'état : le réseau reste en
+    Construction, ce qui prouve que l'aspect de sécurité s'exécute avant le corps de la méthode.
+  </div>
+</section>
+
+<!-- ============================= LOG AOP ============================= -->
+<section class="section">
+  <h2>10 bis. Journalisation et sécurisation — preuve d'exécution</h2>
+  <p>
+    Chaque appel de méthode du domaine est tracé par <code>LoggingAspect</code>. L'extrait ci-dessous
+    provient du fichier <code>logs/neural-network.log</code> généré pendant la démonstration : on y
+    retrouve les méthodes du Builder, du réseau, des états et des décorateurs, avec arguments,
+    résultats et durées.
+  </p>
+  <div class="figure">
+    <img src="screenshots/log.png" alt="Extrait du journal AOP">
+    <div class="caption">Extrait de logs/neural-network.log — journalisation AspectJ .</div>
+  </div>
+  <div class="card security" style="margin-bottom:0;">
+    <h4>Refus d'accès journalisé</h4>
+    <p style="margin:0;">
+      Le <code>SecurityAspect</code> journalise également les tentatives refusées
+      (<code>[SECURITE] Acces refuse a NeuralNetwork.train() : role requis 'DATA_SCIENTIST', role
+      courant 'GUEST'</code>) avant de lever une <code>SecurityException</code>. La sécurité est donc
+      à la fois appliquée et auditée, sans une ligne de code dans le domaine.
+    </p>
+  </div>
+</section>
+
+<!-- ============================= CONCLUSION ============================= -->
+<section class="section">
+  <h2>11. Améliorations et conclusion</h2>
+
+  <h3>11.1 Améliorations apportées</h3>
+  <div class="two-col">
+    <div class="card improve">
+      <h4>Factory</h4>
+      <p style="margin:0;">
+        <code>ActivationFactory</code> et <code>LayerFactory</code> centralisent la création,
+        simplifient les tests et réduisent le couplage aux classes concrètes.
+      </p>
+    </div>
+    <div class="card improve">
+      <h4>Builder</h4>
+      <p style="margin:0;">
+        Construction fluide, validation de l'architecture, injection des observateurs et graine
+        déterministe pour des tests reproductibles.
+      </p>
+    </div>
+  </div>
+  <div class="card improve">
+    <h4>Singleton</h4>
+    <p style="margin:0;">
+      <code>NetworkConfig</code> fournit une configuration unique (epochs, learning rate, seed) avec
+      validation des valeurs ; l'initialisation statique garantit la thread-safety.
+    </p>
+  </div>
+
+  <h3>11.2 Bilan par exigence</h3>
+  <table>
+    <thead><tr><th>Exigence</th><th>Pattern</th><th>Validation</th></tr></thead>
+    <tbody>
+      <tr><td>a — fonctions interchangeables</td><td>Strategy</td><td><span class="ok">Tests dédiés + diagramme</span></td></tr>
+      <tr><td>b — ancienne fonction adaptée</td><td>Adapter</td><td><span class="ok">LegacyArcTan testée et utilisée</span></td></tr>
+      <tr><td>c — états du réseau</td><td>State</td><td><span class="ok">Transitions et refus de predict testés</span></td></tr>
+      <tr><td>d — notification</td><td>Observer</td><td><span class="ok">Dashboard notifié (2 événements)</span></td></tr>
+      <tr><td>e — couches dynamiques</td><td>Decorator</td><td><span class="ok">Dropout + BatchNorm composés</span></td></tr>
+      <tr><td>f — journalisation</td><td>Aspect</td><td><span class="ok">logs/neural-network.log généré</span></td></tr>
+      <tr><td>g — sécurité</td><td>Aspect</td><td><span class="ok">GUEST refusé, ADMIN autorisé</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>11.3 Conclusion</h3>
+  <p>
+    Le modèle livré couvre l'ensemble des exigences de l'énoncé. Les patterns structurent
+    naturellement le domaine : Strategy pour les fonctions d'activation, Adapter pour la
+    compatibilité legacy, State pour le cycle de vie du réseau, Observer pour le tableau de bord,
+    Decorator pour enrichir les couches, et AOP pour les préoccupations transverses. Les
+    améliorations Factory, Builder et Singleton rendent la construction plus sûre et le code plus
+    lisible.
+  </p>
+  <p>
+    L'implémentation est vérifiée par 43 tests unitaires sans échec, avec les aspects
+    tissés à la compilation. Le dépôt GitHub contient l'historique complet des commits et le rapport
+    PDF ; les captures présentées dans ce document sont issues de l'exécution réelle de la
+    démonstration et des tests.
+  </p>
+
+  <div class="note" style="margin-bottom:0;">
+    <strong>Piste d'évolution.</strong> Pour un usage industriel, on pourrait séparer
+    l'entraînement réel (rétropropagation) de la simulation actuelle, persister les poids et
+    paramètres (DAO/Repository), et ajouter un second tableau de bord web. Aucun de ces ajouts ne
+    remet en cause l'architecture : le découplage par interfaces le permet.
+  </div>
+</section></body>
+</html>

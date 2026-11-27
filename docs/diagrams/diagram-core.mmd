@@ -1,0 +1,97 @@
+classDiagram
+    direction TB
+
+    class NeuralNetwork {
+        -String name
+        -List~Layer~ layers
+        -NeuralNetworkState state
+        -List~NetworkObserver~ observers
+        -List~Double~ lossHistory
+        +predict(double[]) double[]
+        +train() void
+        +fit() void
+        +transitionTo(NeuralNetworkState, String) void
+        +addObserver(NetworkObserver) void
+        +getStateType() NetworkStateType
+    }
+    class Layer {
+        <<interface>>
+        +forward(double[]) double[]
+        +connectTo(Layer) void
+        +neuronCount() int
+        +description() String
+    }
+    class SimpleLayer {
+        -LayerType type
+        -List~Neuron~ neurons
+    }
+    class Neuron {
+        -int id
+        -double bias
+        -ActivationFunction activation
+        -double output
+        +computeSum() double
+        +forward() double
+    }
+    class Connection {
+        -double weight
+    }
+    class LayerType {
+        <<enumeration>>
+        INPUT
+        HIDDEN
+        OUTPUT
+    }
+    class NeuralNetworkState {
+        <<interface>>
+        +type() NetworkStateType
+        +predict(NeuralNetwork, double[]) double[]
+        +train(NeuralNetwork) void
+        +fit(NeuralNetwork) void
+    }
+    class ConstructionState
+    class TrainingState
+    class TrainedState
+    class NetworkStateType {
+        <<enumeration>>
+        CONSTRUCTION
+        TRAINING
+        TRAINED
+    }
+    class NetworkSubject {
+        <<interface>>
+        +addObserver(NetworkObserver) void
+        +removeObserver(NetworkObserver) void
+        +notifyObservers(NetworkEvent) void
+    }
+    class NetworkObserver {
+        <<interface>>
+        +onNetworkEvent(NetworkEvent) void
+    }
+    class Dashboard {
+        -Map~NetworkStateType, Integer~ transitionCounts
+        +summary() String
+    }
+    class NetworkEvent {
+        <<record>>
+        +String networkName
+        +NetworkStateType state
+        +String message
+    }
+
+    NeuralNetwork o-- "1..*" Layer
+    NeuralNetwork --> NeuralNetworkState : delegue
+    NeuralNetwork ..|> NetworkSubject
+    SimpleLayer ..|> Layer
+    SimpleLayer *-- "1..*" Neuron
+    SimpleLayer --> LayerType
+    Neuron *-- "0..*" Connection
+    Connection --> Neuron : source / destination
+    ConstructionState ..|> NeuralNetworkState
+    TrainingState ..|> NeuralNetworkState
+    TrainedState ..|> NeuralNetworkState
+    NeuralNetworkState ..> NetworkStateType
+    NetworkSubject --> NetworkObserver
+    Dashboard ..|> NetworkObserver
+    NetworkSubject ..> NetworkEvent
+    NeuralNetwork --> NetworkEvent : notifie

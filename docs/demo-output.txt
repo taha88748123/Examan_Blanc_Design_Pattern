@@ -1,0 +1,24 @@
+==============================================================
+ Examen Blanc Design Pattern - Reseau de neurones (GLSID)
+==============================================================
+[1] Architecture du reseau
+    - InputLayer[3] (Identity)
+    - HiddenLayer[5] (Sigmoid) + BatchNorm + Dropout(p=0.2)
+    - OutputLayer[2] (Softmax)
+[2] Etat initial : Construction
+    predict() refuse : Le reseau est en construction : appelez train() ou fit() avant de predire
+[3] Securite : tentative d'entrainement avec le role GUEST
+    Acces refuse a NeuralNetwork.train() : role requis 'DATA_SCIENTIST', role courant 'GUEST'
+[4] Entrainement via fit()
+[Dashboard] reseau-3-5-2 | etat=TRAINING     | fit() : passage en execution via entrainement
+[Dashboard] reseau-3-5-2 | etat=TRAINED      | fit() : le reseau est pret pour l'execution
+    Etat final : Trained
+    Epochs effectues : 30
+    Prediction : [0,6325, 0,3675]
+    Dashboard{transitions={TRAINING=1, TRAINED=1}, derniere=TRAINED}
+[5] Fonctions d'activation : sigmoid, relu, tanh, identity, softmax
+    + LegacyArcTan adaptee par LegacyActivationAdapter
+[6] Journalisation AOP : logs/neural-network.log
+==============================================================
+ Fin de la demonstration
+==============================================================

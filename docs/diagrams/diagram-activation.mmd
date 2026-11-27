@@ -1,0 +1,49 @@
+classDiagram
+    direction TB
+
+    class ActivationFunction {
+        <<interface>>
+        +apply(double) double
+        +apply(double[]) double[]
+        +name() String
+        +isVectorBased() boolean
+    }
+    class SigmoidActivation {
+        +apply(double) double
+    }
+    class IdentityActivation
+    class ReLUActivation
+    class TanhActivation
+    class SoftmaxActivation {
+        +apply(double[]) double[]
+    }
+    class LegacySquashingFunction {
+        <<interface>>
+        +squash(double) double
+        +getLabel() String
+    }
+    class LegacyArcTanSquashing {
+        +squash(double) double
+    }
+    class LegacyActivationAdapter {
+        -LegacySquashingFunction legacyFunction
+        +apply(double) double
+        +name() String
+    }
+    class Neuron {
+        -ActivationFunction activation
+        -double bias
+    }
+
+    ActivationFunction <|.. SigmoidActivation
+    ActivationFunction <|.. IdentityActivation
+    ActivationFunction <|.. ReLUActivation
+    ActivationFunction <|.. TanhActivation
+    ActivationFunction <|.. SoftmaxActivation
+    ActivationFunction <|.. LegacyActivationAdapter
+    LegacyActivationAdapter --> LegacySquashingFunction : adapte
+    LegacySquashingFunction <|.. LegacyArcTanSquashing
+    Neuron --> ActivationFunction
+    note for LegacyActivationAdapter "Adapter : expose squash()<br/>comme apply()"
+    note for ActivationFunction "Strategy : fonctions<br/>interchangeables"
+

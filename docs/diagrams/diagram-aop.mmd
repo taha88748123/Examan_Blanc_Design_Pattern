@@ -1,0 +1,33 @@
+classDiagram
+    direction LR
+
+    class NeuralNetwork {
+        +train() void
+        +fit() void
+        +predict(double[]) double[]
+    }
+    class Secured {
+        <<annotation>>
+        +String value()
+    }
+    class LoggingAspect {
+        <<aspect>>
+        +logMethodCall(ProceedingJoinPoint) Object
+    }
+    class SecurityAspect {
+        <<aspect>>
+        +checkAccess(ProceedingJoinPoint, Secured) Object
+    }
+    class SecurityContext {
+        <<utility>>
+        +getRole() String
+        +setRole(String) void
+        +hasRole(String) boolean
+    }
+
+    NeuralNetwork ..> Secured : annoté sur train / fit / predict
+    SecurityAspect ..> Secured : lit le rôle requis
+    SecurityAspect ..> SecurityContext : vérifie le rôle courant
+    SecurityAspect ..> NeuralNetwork : protege les appels
+    LoggingAspect ..> NeuralNetwork : journalise tous les appels
+    note for LoggingAspect "logs/neural-network.log"

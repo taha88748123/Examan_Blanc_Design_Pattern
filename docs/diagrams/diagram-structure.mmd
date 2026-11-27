@@ -1,0 +1,65 @@
+classDiagram
+    direction TB
+
+    class Layer {
+        <<interface>>
+        +forward(double[]) double[]
+        +connectTo(Layer) void
+        +description() String
+    }
+    class SimpleLayer {
+        -List~Neuron~ neurons
+    }
+    class LayerDecorator {
+        <<abstract>>
+        #Layer delegate
+        +forward(double[]) double[]
+    }
+    class DropoutDecorator {
+        -double rate
+        +forward(double[]) double[]
+    }
+    class BatchNormalizationDecorator {
+        +forward(double[]) double[]
+    }
+    class NeuralNetworkBuilder {
+        -String name
+        -List~Layer~ layers
+        -long seed
+        +inputLayer(int) NeuralNetworkBuilder
+        +hiddenLayer(int) NeuralNetworkBuilder
+        +outputLayer(int) NeuralNetworkBuilder
+        +observer(NetworkObserver) NeuralNetworkBuilder
+        +build() NeuralNetwork
+    }
+    class NeuralNetwork
+    class LayerFactory {
+        <<utility>>
+        +createInputLayer(int) Layer
+        +createHiddenLayer(int) Layer
+        +createOutputLayer(int) Layer
+    }
+    class ActivationFactory {
+        <<utility>>
+        +create(String) ActivationFunction
+    }
+    class ActivationFunction {
+        <<interface>>
+    }
+    class NetworkConfig {
+        <<singleton>>
+        -int epochs
+        -double learningRate
+        +getInstance() NetworkConfig
+    }
+
+    Layer <|.. SimpleLayer
+    Layer <|.. LayerDecorator
+    LayerDecorator o-- Layer : decore
+    LayerDecorator <|-- DropoutDecorator
+    LayerDecorator <|-- BatchNormalizationDecorator
+    NeuralNetworkBuilder ..> NeuralNetwork : construit
+    NeuralNetworkBuilder ..> Layer : configure
+    LayerFactory ..> Layer : cree
+    ActivationFactory ..> ActivationFunction : cree
+    NeuralNetwork --> NetworkConfig
